@@ -51,7 +51,7 @@ def _write_thread_file(thread: ThreadData, fmt: str, output_dir: Path) -> str:
 async def scrape_keylol(
     date: str = "",
     tid: str = "",
-    fid: int = 319,
+    fid: int = 271,
     max_pages: int = 3,
     max_comments: int = 50,
     include_comments: bool = True,

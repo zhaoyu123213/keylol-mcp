@@ -42,7 +42,7 @@ uvx --from git+https://github.com/zhaoyu123213/keylol-mcp keylol-mcp
 |------|------|--------|------|
 | `date` | string | 今天 | 采集日期，格式 YYYY-MM-DD |
 | `tid` | string | - | 指定帖子 ID（提供时忽略 date） |
-| `fid` | int | 319 | 板块 ID（319=慈善包板块） |
+| `fid` | int | 271 | 板块 ID（271=慈善包板块） |
 | `max_pages` | int | 3 | 列表翻页上限 |
 | `max_comments` | int | 50 | 每帖最多评论数 |
 | `include_comments` | bool | true | 是否采集评论 |
@@ -78,13 +78,9 @@ scrape_keylol(tid="1034537")
 scrape_keylol(fid=161, format="json", date="2026-04-01")
 ```
 
-## 常用板块 fid
+## 板块 fid
 
-| 板块 | fid |
-|------|-----|
-| 慈善包 | 319 |
-| Steam 综合讨论 | 161 |
-| 优惠信息 | 150 |
+默认 fid 为 271（慈善包板块）。其他板块的 fid 可以在 Keylol 对应板块页面的 URL 中找到，格式为 `forum.php?mod=forumdisplay&fid=XXX`。
 
 ## 开发
 
