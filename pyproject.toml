@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "keylol-mcp"
+version = "0.1.0"
+description = "Keylol 论坛 MCP Server — 通过 MCP 协议采集其乐论坛帖子数据"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+authors = [
+    { name = "NoobTom" },
+]
+keywords = ["mcp", "keylol", "scraper", "steam", "discuz"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+]
+dependencies = [
+    "fastmcp>=2.0.0",
+    "httpx>=0.27.0",
+    "beautifulsoup4>=4.12.0",
+    "html2text>=2024.2.26",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "hypothesis>=6.100",
+]
+
+[project.urls]
+Homepage = "https://github.com/zhaoyu123213/keylol-mcp"
+Repository = "https://github.com/zhaoyu123213/keylol-mcp"
+Issues = "https://github.com/zhaoyu123213/keylol-mcp/issues"
+
+[project.scripts]
+keylol-mcp = "keylol_mcp.server:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/keylol_mcp"]
