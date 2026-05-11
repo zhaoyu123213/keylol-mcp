@@ -8,7 +8,7 @@ from pathlib import Path
 
 from fastmcp import FastMCP
 
-from keylol_mcp.scraper import scrape_by_date, scrape_by_tid
+from keylol_mcp.scraper import scrape_by_date, scrape_by_tid, scrape_latest_threads
 from keylol_mcp.formatter import to_markdown, to_json
 from keylol_mcp.models import ThreadData
 
@@ -52,6 +52,7 @@ async def scrape_keylol(
     date: str = "",
     tid: str = "",
     fid: int = 271,
+    mode: str = "",
     max_pages: int = 3,
     max_comments: int = 50,
     include_comments: bool = True,
@@ -61,14 +62,16 @@ async def scrape_keylol(
 ) -> dict:
     """采集 Keylol 论坛帖子数据。
 
-    支持两种模式：
+    支持三种模式：
     - 按日期采集：指定 date 参数，爬取该日期在指定板块的所有帖子
     - 按帖子ID采集：指定 tid 参数，只爬取该帖子（忽略 date）
+    - 最新发表：指定 mode="newthread"，爬取全站最新发表的帖子
 
     Args:
         date: 采集日期，格式 YYYY-MM-DD，默认今天
         tid: 指定帖子 ID，如果提供则只爬这一个帖子（忽略 date 参数）
         fid: 板块 ID，默认 319（慈善包板块）
+        mode: 采集模式，"newthread" 表示爬取全站最新发表页面，留空则按板块采集
         max_pages: 列表翻页上限，默认 3
         max_comments: 每帖最多抓多少评论，默认 50
         include_comments: 是否需要评论，默认 true
@@ -115,8 +118,36 @@ async def scrape_keylol(
             threads.append(thread_data)
         except Exception as e:
             errors.append({"tid": tid, "error": str(e)})
+    elif mode == "newthread":
+        # 最新发表模式：爬取全站最新帖子
+        if date:
+            try:
+                target_date = datetime.strptime(date, "%Y-%m-%d").date()
+            except ValueError:
+                return {
+                    "success": False,
+                    "error": f"Invalid date format '{date}', expected YYYY-MM-DD",
+                    "threads_scraped": 0,
+                    "files_written": [],
+                    "errors": [],
+                }
+        else:
+            from datetime import date as date_cls
+            target_date = date_cls.today()
+
+        try:
+            threads = await scrape_latest_threads(
+                cookie=cookie,
+                max_pages=max_pages,
+                max_comments=max_comments,
+                include_comments=include_comments,
+                request_delay=request_delay,
+                target_date=target_date,
+            )
+        except Exception as e:
+            return {"success": False, "error": str(e), "threads_scraped": 0, "files_written": [], "errors": []}
     else:
-        # 按日期模式
+        # 按板块+日期模式
         if date:
             try:
                 target_date = datetime.strptime(date, "%Y-%m-%d").date()
