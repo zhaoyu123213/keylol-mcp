@@ -39,10 +39,10 @@ def parse_guide_newthread_list(html: str) -> list[dict]:
 
     for tbody in tbodies:
         try:
-            title_el = tbody.select_one("a.s.xst") or tbody.select_one("th a.xst")
+            title_el = tbody.select_one("a.s.xst") or tbody.select_one("th a.xst") or tbody.select_one("a.xst")
             if not title_el:
                 # guide 页面的链接可能没有 .s 类
-                title_el = tbody.select_one('a[href*="thread-"]')
+                title_el = tbody.select_one('a[href*="thread-"]') or tbody.select_one('a[href^="t"]')
             if not title_el:
                 continue
 
@@ -58,10 +58,24 @@ def parse_guide_newthread_list(html: str) -> list[dict]:
             author_el = tbody.select_one("td.by cite a") or tbody.select_one(".by a")
             author = author_el.get_text(strip=True) if author_el else ""
 
-            # 提取日期
+            # 提取日期 - guide 页面结构：td.by[0]=板块, td.by[1]=作者+日期, td.by[2]=最后回复
             by_cells = tbody.select("td.by")
             date_text = ""
-            if by_cells:
+            if len(by_cells) >= 2:
+                # 日期在第二个 td.by 的 em > span[title] 里
+                second_by = by_cells[1]
+                span = second_by.select_one("em span[title]")
+                if span:
+                    date_text = span.get("title", "")
+                else:
+                    em = second_by.select_one("em")
+                    if em:
+                        date_text = em.get_text(strip=True)
+                # 作者在第二个 td.by 的 cite > a 里
+                author_el2 = second_by.select_one("cite a")
+                if author_el2:
+                    author = author_el2.get_text(strip=True)
+            elif by_cells:
                 first_by = by_cells[0]
                 span = first_by.select_one("em span[title]")
                 if span:
@@ -71,8 +85,10 @@ def parse_guide_newthread_list(html: str) -> list[dict]:
                     if em:
                         date_text = em.get_text(strip=True)
 
-            # 提取板块名（guide 页面特有）
-            forum_el = tbody.select_one("td.by a[href*='forum-']") or tbody.select_one("a[href*='fid=']")
+            # 提取板块名 - guide 页面第一个 td.by 里的链接
+            forum_el = None
+            if by_cells:
+                forum_el = by_cells[0].select_one("a[href*='f']")
             forum_name = forum_el.get_text(strip=True) if forum_el else ""
 
             if not tid:

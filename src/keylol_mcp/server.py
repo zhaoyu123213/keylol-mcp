@@ -95,8 +95,26 @@ async def scrape_keylol(
             "errors": [],
         }
 
-    # 创建输出目录
+    # 创建输出目录（按来源自动分子目录）
     out_path = Path(output_dir)
+    if tid:
+        # 单帖模式：output_dir/tid/
+        out_path = out_path / "tid"
+    elif mode == "newthread":
+        # 最新发表模式：output_dir/newthread/YYYY-MM-DD/
+        if date:
+            out_path = out_path / "newthread" / date
+        else:
+            from datetime import date as date_cls
+            out_path = out_path / "newthread" / date_cls.today().isoformat()
+    else:
+        # 板块模式：output_dir/f{fid}/YYYY-MM-DD/
+        if date:
+            out_path = out_path / f"f{fid}" / date
+        else:
+            from datetime import date as date_cls
+            out_path = out_path / f"f{fid}" / date_cls.today().isoformat()
+
     try:
         out_path.mkdir(parents=True, exist_ok=True)
     except OSError as e:
