@@ -388,15 +388,28 @@ async def scrape_by_date(
     max_comments: int,
     include_comments: bool,
     request_delay: float,
+    order_by: str = "dateline",
 ) -> list[ThreadData]:
-    """按日期采集板块帖子列表并抓取内容"""
+    """按日期采集板块帖子列表并抓取内容
+
+    Args:
+        order_by: 排序方式，"dateline" 按发帖时间（最新发布），
+                  "lastpost" 按最后回复时间（最新回复）。默认 "dateline"。
+    """
     results: list[ThreadData] = []
     seen_tids: set[str] = set()
+
+    # 构建排序参数
+    if order_by == "lastpost":
+        order_params = "&filter=lastpost&orderby=lastpost"
+    else:
+        # dateline = 按发帖时间排序
+        order_params = "&filter=author&orderby=dateline"
 
     async with _build_client(cookie) as client:
         for page in range(1, max_pages + 1):
             list_url = (
-                f"{BASE_URL}/forum.php?mod=forumdisplay&fid={fid}&page={page}"
+                f"{BASE_URL}/forum.php?mod=forumdisplay&fid={fid}&page={page}{order_params}"
             )
 
             await asyncio.sleep(request_delay) if page > 1 else None

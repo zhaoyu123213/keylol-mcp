@@ -53,6 +53,7 @@ async def scrape_keylol(
     tid: str = "",
     fid: int = 271,
     mode: str = "",
+    order_by: str = "dateline",
     max_pages: int = 3,
     max_comments: int = 50,
     include_comments: bool = True,
@@ -72,6 +73,7 @@ async def scrape_keylol(
         tid: 指定帖子 ID，如果提供则只爬这一个帖子（忽略 date 参数）
         fid: 板块 ID，默认 319（慈善包板块）
         mode: 采集模式，"newthread" 表示爬取全站最新发表页面，留空则按板块采集
+        order_by: 板块模式的排序方式，"dateline" 按发帖时间（最新发布），"lastpost" 按最后回复时间（最新回复）。默认 "dateline"
         max_pages: 列表翻页上限，默认 3
         max_comments: 每帖最多抓多少评论，默认 50
         include_comments: 是否需要评论，默认 true
@@ -90,6 +92,16 @@ async def scrape_keylol(
         return {
             "success": False,
             "error": f"Invalid format '{format}', must be 'json' or 'markdown'",
+            "threads_scraped": 0,
+            "files_written": [],
+            "errors": [],
+        }
+
+    # 验证 order_by 参数
+    if order_by not in ("dateline", "lastpost"):
+        return {
+            "success": False,
+            "error": f"Invalid order_by '{order_by}', must be 'dateline' or 'lastpost'",
             "threads_scraped": 0,
             "files_written": [],
             "errors": [],
@@ -190,6 +202,7 @@ async def scrape_keylol(
                 max_comments=max_comments,
                 include_comments=include_comments,
                 request_delay=request_delay,
+                order_by=order_by,
             )
         except Exception as e:
             return {"success": False, "error": str(e), "threads_scraped": 0, "files_written": [], "errors": []}
