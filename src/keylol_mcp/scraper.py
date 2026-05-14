@@ -52,7 +52,7 @@ def parse_guide_newthread_list(html: str) -> list[dict]:
 
             tid_match = re.search(
                 r"(?:thread-|(?:^|/)t)(\d+)", href
-            ) or re.search(r"\bt(\d+)-", href)
+            ) or re.search(r"\bt(\d+)-", href) or re.search(r"tid=(\d+)", href)
             tid = tid_match.group(1) if tid_match else ""
 
             author_el = tbody.select_one("td.by cite a") or tbody.select_one(".by a")
@@ -127,7 +127,7 @@ def parse_thread_list(html: str) -> list[dict]:
 
             tid_match = re.search(
                 r"(?:thread-|(?:^|/)t)(\d+)", href
-            ) or re.search(r"\bt(\d+)-", href)
+            ) or re.search(r"\bt(\d+)-", href) or re.search(r"tid=(\d+)", href)
             tid = tid_match.group(1) if tid_match else ""
 
             author_el = tbody.select_one("td.by cite a") or tbody.select_one(".by a")
@@ -389,6 +389,7 @@ async def scrape_by_date(
     include_comments: bool,
     request_delay: float,
     order_by: str = "dateline",
+    typeid: int = 0,
 ) -> list[ThreadData]:
     """按板块采集帖子列表并抓取内容
 
@@ -396,6 +397,7 @@ async def scrape_by_date(
         target_date: 目标日期过滤，None 表示不过滤（抓取列表页上所有帖子）。
         order_by: 排序方式，"dateline" 按发帖时间（最新发布），
                   "lastpost" 按最后回复时间（最新回复）。默认 "dateline"。
+        typeid: 帖子分类 ID，如 47=出售、48=收购。0 表示不筛选。
     """
     results: list[ThreadData] = []
     seen_tids: set[str] = set()
@@ -407,10 +409,13 @@ async def scrape_by_date(
         # dateline = 按发帖时间排序
         order_params = "&orderby=dateline"
 
+    # 构建分类筛选参数
+    typeid_params = f"&filter=typeid&typeid={typeid}" if typeid else ""
+
     async with _build_client(cookie) as client:
         for page in range(1, max_pages + 1):
             list_url = (
-                f"{BASE_URL}/forum.php?mod=forumdisplay&fid={fid}&page={page}{order_params}"
+                f"{BASE_URL}/forum.php?mod=forumdisplay&fid={fid}&page={page}{typeid_params}{order_params}"
             )
 
             await asyncio.sleep(request_delay) if page > 1 else None
