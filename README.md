@@ -50,6 +50,7 @@ uvx --from git+https://github.com/zhaoyu123213/keylol-mcp keylol-mcp
 | `fid` | int | 271 | 板块 ID（271=慈善包板块） |
 | `mode` | string | - | 采集模式：`"newthread"` 爬取全站最新发表，留空按板块采集 |
 | `order_by` | string | "dateline" | 板块模式排序：`"dateline"` 按发帖时间（最新发布），`"lastpost"` 按最后回复时间（最新回复） |
+| `typeid` | int | 0 | 帖子分类筛选 ID（仅板块模式），如 47=出售、48=收购。0 表示不筛选 |
 | `max_pages` | int | 3 | 列表翻页上限 |
 | `max_comments` | int | 50 | 每帖最多评论数 |
 | `include_comments` | bool | true | 是否采集评论 |
@@ -108,6 +109,16 @@ scrape_keylol(fid=271)
 采集板块最近有回复的帖子（按最后回复排序）：
 ```
 scrape_keylol(fid=271, order_by="lastpost")
+```
+
+采集交易板块的"出售"类帖子：
+```
+scrape_keylol(fid=201, typeid=47, order_by="lastpost")
+```
+
+采集交易板块的"收购"类帖子：
+```
+scrape_keylol(fid=201, typeid=48, order_by="lastpost")
 ```
 
 采集指定帖子：
