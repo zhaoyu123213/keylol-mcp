@@ -19,7 +19,8 @@ uvx --from git+https://github.com/zhaoyu123213/keylol-mcp keylol-mcp
       "command": "uvx",
       "args": ["--from", "git+https://github.com/zhaoyu123213/keylol-mcp", "keylol-mcp"],
       "env": {
-        "KEYLOL_COOKIE": "你的 Keylol 登录 Cookie"
+        "KEYLOL_COOKIE": "你的 Keylol 登录 Cookie",
+        "KEYLOL_OUTPUT_DIR": "D:/your/project/path/keylol_output"
       }
     }
   }
@@ -53,7 +54,7 @@ uvx --from git+https://github.com/zhaoyu123213/keylol-mcp keylol-mcp
 | `max_comments` | int | 50 | 每帖最多评论数 |
 | `include_comments` | bool | true | 是否采集评论 |
 | `format` | string | "markdown" | 输出格式："json" 或 "markdown" |
-| `output_dir` | string | "./keylol_output" | 文件保存根目录 |
+| `output_dir` | string | 环境变量 `KEYLOL_OUTPUT_DIR` 或 "./keylol_output" | 文件保存根目录 |
 | `request_delay` | float | 0.6 | 请求间隔（秒） |
 
 ### 输出目录结构

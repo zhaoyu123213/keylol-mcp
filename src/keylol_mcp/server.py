@@ -25,6 +25,13 @@ def _get_cookie() -> str:
     return cookie
 
 
+def _get_output_dir(output_dir: str) -> str:
+    """解析输出目录：优先使用参数，其次环境变量，最后默认 ./keylol_output"""
+    if output_dir:
+        return output_dir
+    return os.environ.get("KEYLOL_OUTPUT_DIR", "./keylol_output")
+
+
 def _write_thread_file(thread: ThreadData, fmt: str, output_dir: Path) -> str:
     """将单个帖子写入文件，返回文件路径"""
     # 从帖子日期提取日期部分用于文件名
@@ -58,7 +65,7 @@ async def scrape_keylol(
     max_comments: int = 50,
     include_comments: bool = True,
     format: str = "markdown",
-    output_dir: str = "./keylol_output",
+    output_dir: str = "",
     request_delay: float = 0.6,
 ) -> dict:
     """采集 Keylol 论坛帖子数据。
@@ -78,7 +85,7 @@ async def scrape_keylol(
         max_comments: 每帖最多抓多少评论，默认 50
         include_comments: 是否需要评论，默认 true
         format: 输出格式，"json" 或 "markdown"，默认 "markdown"
-        output_dir: 文件保存目录，默认 "./keylol_output"
+        output_dir: 文件保存目录，留空则使用环境变量 KEYLOL_OUTPUT_DIR，都没设则默认 "./keylol_output"
         request_delay: 请求间隔秒数，默认 0.6
     """
     # 验证 cookie
@@ -108,7 +115,7 @@ async def scrape_keylol(
         }
 
     # 创建输出目录（按来源自动分子目录）
-    out_path = Path(output_dir)
+    out_path = Path(_get_output_dir(output_dir))
     if tid:
         # 单帖模式：output_dir/tid/
         out_path = out_path / "tid"
