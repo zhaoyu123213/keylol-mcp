@@ -69,7 +69,7 @@ async def scrape_keylol(
     - 最新发表：指定 mode="newthread"，爬取全站最新发表的帖子
 
     Args:
-        date: 采集日期，格式 YYYY-MM-DD，默认今天
+        date: 采集日期，格式 YYYY-MM-DD。板块模式下留空表示不限日期（抓取列表页所有帖子）；newthread 模式下留空默认今天
         tid: 指定帖子 ID，如果提供则只爬这一个帖子（忽略 date 参数）
         fid: 板块 ID，默认 319（慈善包板块）
         mode: 采集模式，"newthread" 表示爬取全站最新发表页面，留空则按板块采集
@@ -120,12 +120,12 @@ async def scrape_keylol(
             from datetime import date as date_cls
             out_path = out_path / "newthread" / date_cls.today().isoformat()
     else:
-        # 板块模式：output_dir/f{fid}/YYYY-MM-DD/
+        # 板块模式：output_dir/f{fid}/YYYY-MM-DD/ 或 output_dir/f{fid}/all/
         if date:
             out_path = out_path / f"f{fid}" / date
         else:
             from datetime import date as date_cls
-            out_path = out_path / f"f{fid}" / date_cls.today().isoformat()
+            out_path = out_path / f"f{fid}" / "all"
 
     try:
         out_path.mkdir(parents=True, exist_ok=True)
@@ -177,7 +177,7 @@ async def scrape_keylol(
         except Exception as e:
             return {"success": False, "error": str(e), "threads_scraped": 0, "files_written": [], "errors": []}
     else:
-        # 按板块+日期模式
+        # 按板块模式（可选日期过滤）
         if date:
             try:
                 target_date = datetime.strptime(date, "%Y-%m-%d").date()
@@ -190,8 +190,8 @@ async def scrape_keylol(
                     "errors": [],
                 }
         else:
-            from datetime import date as date_cls
-            target_date = date_cls.today()
+            # 不指定日期时不过滤，抓取列表页上所有帖子
+            target_date = None
 
         try:
             threads = await scrape_by_date(

@@ -383,16 +383,17 @@ async def _scrape_thread(
 async def scrape_by_date(
     cookie: str,
     fid: int,
-    target_date: date,
+    target_date: date | None,
     max_pages: int,
     max_comments: int,
     include_comments: bool,
     request_delay: float,
     order_by: str = "dateline",
 ) -> list[ThreadData]:
-    """按日期采集板块帖子列表并抓取内容
+    """按板块采集帖子列表并抓取内容
 
     Args:
+        target_date: 目标日期过滤，None 表示不过滤（抓取列表页上所有帖子）。
         order_by: 排序方式，"dateline" 按发帖时间（最新发布），
                   "lastpost" 按最后回复时间（最新回复）。默认 "dateline"。
     """
@@ -419,11 +420,17 @@ async def scrape_by_date(
                 break
 
             threads = parse_thread_list(html)
-            matched = [t for t in threads if matches_date(t["date_text"], target_date)]
 
-            # 如果本页没有匹配日期的帖子，停止翻页
-            if not matched:
-                break
+            # 如果指定了日期则过滤，否则取列表页上所有帖子
+            if target_date:
+                matched = [t for t in threads if matches_date(t["date_text"], target_date)]
+                # 如果本页没有匹配日期的帖子，停止翻页
+                if not matched:
+                    break
+            else:
+                matched = threads
+                if not matched:
+                    break
 
             for t in matched:
                 tid = t["tid"]
