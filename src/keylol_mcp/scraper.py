@@ -402,10 +402,10 @@ async def scrape_by_date(
 
     # 构建排序参数
     if order_by == "lastpost":
-        order_params = "&filter=lastpost&orderby=lastpost"
+        order_params = "&orderby=lastpost"
     else:
         # dateline = 按发帖时间排序
-        order_params = "&filter=author&orderby=dateline"
+        order_params = "&orderby=dateline"
 
     async with _build_client(cookie) as client:
         for page in range(1, max_pages + 1):
