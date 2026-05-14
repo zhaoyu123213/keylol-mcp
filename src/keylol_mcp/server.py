@@ -127,12 +127,13 @@ async def scrape_keylol(
             from datetime import date as date_cls
             out_path = out_path / "newthread" / date_cls.today().isoformat()
     else:
-        # 板块模式：output_dir/f{fid}/YYYY-MM-DD/ 或 output_dir/f{fid}/all/
+        # 板块模式：output_dir/f{fid}/YYYY-MM-DD/
+        # date 参数有值时按指定日期分目录；无 date 时按采集当天日期分目录
+        from datetime import date as date_cls
         if date:
             out_path = out_path / f"f{fid}" / date
         else:
-            from datetime import date as date_cls
-            out_path = out_path / f"f{fid}" / "all"
+            out_path = out_path / f"f{fid}" / date_cls.today().isoformat()
 
     try:
         out_path.mkdir(parents=True, exist_ok=True)
